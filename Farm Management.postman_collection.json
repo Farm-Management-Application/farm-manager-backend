@@ -1,0 +1,300 @@
+{
+	"info": {
+		"_postman_id": "b0ace5a0-4fcd-4c58-a9fa-110022192c9e",
+		"name": "Farm Management",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "24085527"
+	},
+	"item": [
+		{
+			"name": "Chicken",
+			"item": [
+				{
+					"name": "create chicken",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"Group 1\",\r\n  \"totalCount\": 100,\r\n  \"foodConsumption\": {\r\n    \"sacks\": 1,\r\n    \"pricePerSack\": 20\r\n  },\r\n  \"birthDate\": \"2024-01-01\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/farm/chickens"
+					},
+					"response": []
+				},
+				{
+					"name": "getChicken",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/farm/chickens/66858545297882b66ad53a68"
+					},
+					"response": []
+				},
+				{
+					"name": "get total chicken",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/farm/chickens/total"
+					},
+					"response": []
+				},
+				{
+					"name": "getAllChickens",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/farm/chickens"
+					},
+					"response": []
+				},
+				{
+					"name": "calculate-egg-production for one groupe",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"timeFrame\": \"month\",\r\n  \"value\": 3\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/farm/chickens/6685907cde03e69d680eb88e/egg-production"
+					},
+					"response": []
+				},
+				{
+					"name": "update chicken",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"Updated Group\",\r\n  \"totalCount\": 150,\r\n  \"foodConsumption\": {\r\n    \"sacks\": 2,\r\n    \"pricePerSack\": 25\r\n  },\r\n  \"birthDate\": \"2024-01-01\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/farm/chickens/6685907cde03e69d680eb88e"
+					},
+					"response": []
+				},
+				{
+					"name": "Egg production all chickens",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"timeFrame\": \"week\",\r\n  \"value\": 52\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/farm/chickens/egg-production"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Fish",
+			"item": [
+				{
+					"name": "create fish",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Groupe de Kanga 1\",\r\n  \"totalCount\": 100,\r\n  \"type\": \"Kanga\",\r\n  \"foodConsumption\": {\r\n    \"sacks\": 10,\r\n    \"pricePerSack\": 50\r\n  },\r\n  \"birthDate\": \"2023-01-01\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/farm/fishes"
+					},
+					"response": []
+				},
+				{
+					"name": "update fish",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Groupe de Kanga 1 Modifié\",\r\n  \"totalCount\": 120,\r\n  \"foodConsumption\": {\r\n    \"sacks\": 12,\r\n    \"pricePerSack\": 55\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/farm/fishes/66868b64dbe37fb1571093d3"
+					},
+					"response": []
+				},
+				{
+					"name": "get all fishes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/farm/fishes"
+					},
+					"response": []
+				},
+				{
+					"name": "get single groupe",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/farm/fishes/66868b64dbe37fb1571093d3"
+					},
+					"response": []
+				},
+				{
+					"name": "estimate price single fish group",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": "{{baseUrl}}/api/farm/fishes/66868b64dbe37fb1571093d3/estimate-price"
+					},
+					"response": []
+				},
+				{
+					"name": "estimate fish production for all",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": "{{baseUrl}}/api/farm/fishes/estimate-price"
+					},
+					"response": []
+				},
+				{
+					"name": "get total fish",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://192.168.43.68:3000/api/farm/fishes/total"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Pig",
+			"item": [
+				{
+					"name": "create pig",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Group 1\",\r\n  \"totalCount\": 10,\r\n  \"foodConsumption\": {\r\n    \"sacks\": 1,\r\n    \"pricePerSack\": 30\r\n  },\r\n  \"birthDate\": \"2024-01-01\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/farm/pigs"
+					},
+					"response": []
+				},
+				{
+					"name": "update pig",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"totalCount\": 16,\r\n  \"foodConsumption\": {\r\n    \"sacks\": 2,\r\n    \"pricePerSack\": 40\r\n  },\r\n  \"birthDate\": \"2023-01-01\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/farm/pigs/668e3116b04d282eb010bbac"
+					},
+					"response": []
+				},
+				{
+					"name": "get all pigs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/farm/pigs"
+					},
+					"response": []
+				},
+				{
+					"name": "get single pig",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/farm/pigs/66871570dd262242bcf23f3c"
+					},
+					"response": []
+				},
+				{
+					"name": "total pigs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/farm/pigs/total"
+					},
+					"response": []
+				},
+				{
+					"name": "estimate one pig group",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": "{{baseUrl}}/api/farm/pigs/668e3116b04d282eb010bbac/estimate-price"
+					},
+					"response": []
+				},
+				{
+					"name": "estimate all pig groups",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": "{{baseUrl}}/api/farm/pigs/estimate-price"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000"
+		}
+	]
+}
