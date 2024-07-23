@@ -14,12 +14,11 @@ const createChicken = async (req, res) => {
 const updateChicken = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(id)
-    const { title, totalCount, foodConsumption, birthDate } = req.body;
+    const { title, totalCount, birthDate } = req.body;
 
     const updatedGroup = await Chicken.findByIdAndUpdate(
       id,
-      { title, totalCount, foodConsumption, birthDate, modifiedAt: Date.now() },
+      { title, totalCount, birthDate, modifiedAt: Date.now() },
       { new: true }
     );
 

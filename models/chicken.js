@@ -9,16 +9,6 @@ const ChickenSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  foodConsumption: {
-    sacks: {
-      type: Number,
-      required: true,
-    },
-    pricePerSack: {
-      type: Number,
-      required: true,
-    },
-  },
   birthDate: {
     type: Date,
     required: true,
