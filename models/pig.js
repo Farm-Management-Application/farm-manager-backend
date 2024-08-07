@@ -15,16 +15,6 @@ const PigSchema = new mongoose.Schema({
     required: true,
     enum: ['petit', 'moyen', 'grand'], // Available types
   },
-  foodConsumption: {
-    sacks: {
-      type: Number,
-      required: true,
-    },
-    pricePerSack: {
-      type: Number,
-      required: true,
-    },
-  },
   birthDate: {
     type: Date,
     required: true,
