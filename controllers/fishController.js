@@ -79,7 +79,6 @@ const getFishGroupById = async (req, res) => {
   }
 };
 
-// Estimer le prix de vente pour un groupe spécifique de poissons
 const estimatePriceForFishGroup = async (req, res) => {
   const { id } = req.params;
 
@@ -90,22 +89,43 @@ const estimatePriceForFishGroup = async (req, res) => {
     }
 
     const fishTypeData = fishTypes[fishGroup.type];
-    const fishAge = Math.floor(moment.duration(moment().diff(fishGroup.birthDate)).asMonths());
+    const fishAgeMonths = Math.floor(moment.duration(moment().diff(fishGroup.birthDate)).asMonths());
 
-    if (fishAge < fishTypeData.sellAgeMonths) {
+    if (fishAgeMonths < fishTypeData.sellAgeMonths) {
       return res.status(400).json({ message: 'Fish group not yet ready for sale' });
     }
 
-    const totalPrice = Math.floor(fishGroup.totalCount * fishTypeData.unitPrice);
-    const weeksInAge = moment.duration(moment().diff(fishGroup.createdAt)).asWeeks();
-    const foodConsumptintotal = Math.floor(fishGroup.foodConsumption.sacks * fishGroup.foodConsumption.pricePerSack * weeksInAge);
-    const profit = totalPrice - foodConsumptintotal;
+    // Calculate the total weight of the fish group (assuming each fish weighs 1kg at 3 months)
+    const totalWeightKg = fishGroup.totalCount * 1; // 1kg per fish
+    const totalPrice = totalWeightKg * fishTypeData.unitPrice;
 
-    res.status(200).json({ totalPrice, foodConsumptintotal, profit, 'fishAge' : moment.duration(fishAge, 'weeks').humanize() });
+    const weeksInAge = Math.floor(moment.duration(moment().diff(fishGroup.birthDate)).asWeeks());
+
+    // Calculate total food consumption cost
+    let foodConsumptionTotal = 0;
+    if (fishTypeData.pricePerSack > 0) {
+      const feedPeriods = Math.ceil((weeksInAge * 7) / fishTypeData.feedPeriodDays);
+      console.log(fishAgeMonths, weeksInAge, feedPeriods)
+      foodConsumptionTotal = feedPeriods * fishTypeData.pricePerSack;
+    }
+
+    const profit = totalPrice - foodConsumptionTotal;
+
+    // Ensure profit is not negative
+    const finalProfit = profit < 0 ? 0 : profit;
+
+    res.status(200).json({
+      totalPrice,
+      foodConsumptionTotal,
+      profit: finalProfit,
+      fishAge: moment.duration(fishAgeMonths, 'months').humanize(),
+      totalWeightKg,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // Estimer le prix de vente pour tous les poissons éligibles à la vente
 const estimatePriceForAllFishGroups = async (req, res) => {
@@ -137,18 +157,23 @@ const estimatePriceForAllFishGroups = async (req, res) => {
 
     const weeksInAge = moment.duration(moment().diff(oldestGroupCreationDate)).asWeeks();
     const totalFoodConsumptionCost = Math.floor(eligibleFishGroups.reduce((total, fishGroup) => {
-      return total + (fishGroup.foodConsumption.sacks * fishGroup.foodConsumption.pricePerSack * weeksInAge);
-    }, 0));
+      const fishTypeData = fishTypes[fishGroup.type];
+      if (fishTypeData.pricePerSack > 0) {
+        const feedPeriods = Math.ceil(weeksInAge / (fishTypeData.feedPeriodDays / 7));
+        return total + (feedPeriods * fishTypeData.pricePerSack);
+      }
+      return total;
+    }, 0))
 
     const profit = totalPrice - totalFoodConsumptionCost;
 
-    res.status(200).json({ 
-      totalEligibleFish, 
-      weeksInAge: moment.duration(weeksInAge, 'weeks').humanize(), // humanize weeksInAge
+    res.status(200).json({
+      totalEligibleFish,
+      weeksInAge: moment.duration(weeksInAge, 'weeks').humanize(),
       oldestGroupCreationDate: moment(oldestGroupCreationDate).fromNow(),
-      totalPrice, 
-      totalFoodConsumptionCost, 
-      profit 
+      totalPrice,
+      totalFoodConsumptionCost,
+      profit,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

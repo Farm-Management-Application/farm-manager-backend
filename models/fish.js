@@ -15,16 +15,6 @@ const FishSchema = new mongoose.Schema({
     required: true,
     enum: Object.keys(fishTypes) // Utilise les types de poissons définis dans fishData.js
   },
-  foodConsumption: {
-    sacks: {
-      type: Number,
-      required: true,
-    },
-    pricePerSack: {
-      type: Number,
-      required: true,
-    },
-  },
   birthDate: {
     type: Date,
     required: true
