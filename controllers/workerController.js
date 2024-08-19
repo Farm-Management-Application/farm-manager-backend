@@ -69,7 +69,7 @@ exports.deactivateWorker = async (req, res) => {
 };
 
 // Change worker status to inactive by ID
-exports.ativateWorker = async (req, res) => {
+exports.activateWorker = async (req, res) => {
   try {
     const worker = await Worker.findById(req.params.id);
     if (!worker) {
