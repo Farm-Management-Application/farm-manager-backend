@@ -18,6 +18,6 @@ router.put('/:id', workerController.updateWorker);
 // Delete a worker by ID
 router.put('/deactivate/:id', workerController.deactivateWorker);
 
-router.put('/activate/:id', workerController.ativateWorker);
+router.put('/activate/:id', workerController.activateWorker);
 
 module.exports = router;
