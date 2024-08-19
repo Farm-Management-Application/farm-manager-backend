@@ -3,7 +3,9 @@ const { calculateEggProductionForAll, calculateEggProduction } = require('../ser
 
 const createChicken = async (req, res) => {
   try {
+    console.log(req.body)
     const chicken = new Chicken(req.body);
+    console.log(chicken)
     await chicken.save();
     res.status(201).send(chicken);
   } catch (error) {
@@ -14,11 +16,11 @@ const createChicken = async (req, res) => {
 const updateChicken = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, totalCount, birthDate } = req.body;
+    const { name, totalCount, birthDate } = req.body;
 
     const updatedGroup = await Chicken.findByIdAndUpdate(
       id,
-      { title, totalCount, birthDate, modifiedAt: Date.now() },
+      { name, totalCount, birthDate, modifiedAt: Date.now() },
       { new: true }
     );
 
