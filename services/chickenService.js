@@ -60,6 +60,7 @@ const calculateEggProduction = async (group, timeFrame, value, startDate, endDat
   const totalSales = trays * pricePerTray;
 
   const profit = totalSales - totalConsumption - workerSalaryCost - illnessCost;
+  const finalProfit = profit < 0 ? 0 : profit;
   // const profit = totalSales - totalConsumption;
 
   return { 
@@ -67,7 +68,7 @@ const calculateEggProduction = async (group, timeFrame, value, startDate, endDat
     totalSales, 
     trays, 
     totalConsumption: Math.floor(totalConsumption), 
-    profit: Math.floor(profit), 
+    profit: Math.floor(finalProfit), 
     workerSalaryCost: Math.floor(workerSalaryCost),
     illnessCost: Math.floor(illnessCost),
     duration: duration.humanize(), 
@@ -113,6 +114,7 @@ const calculateEggProductionForAll = async (timeFrame, value, startDate, endDate
   const illnessCost = await IllnessService.calculateIllnessCostForLivestockType('Chicken', { startDate, endDate, value, period: timeFrame });
 
   const profit = totalSales - totalFoodConsumptionCost - workerSalaryCost - illnessCost;
+  const finalProfit = profit < 0 ? 0 : profit;
 
   return {
     duration: duration.humanize(),
@@ -122,7 +124,7 @@ const calculateEggProductionForAll = async (timeFrame, value, startDate, endDate
     totalFoodConsumptionCost: Math.floor(totalFoodConsumptionCost), 
     workerSalaryCost: Math.floor(workerSalaryCost),
     illnessCost: Math.floor(illnessCost),
-    profit: Math.floor(profit), 
+    profit: Math.floor(finalProfit), 
   };
 };
 
