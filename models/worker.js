@@ -1,4 +1,3 @@
-// models/Worker.js
 const mongoose = require('mongoose');
 
 const WorkerSchema = new mongoose.Schema({
@@ -7,15 +6,12 @@ const WorkerSchema = new mongoose.Schema({
   salary: { type: Number, required: true },
   date_of_joining: { type: Date, default: Date.now },
   status: { type: String, default: 'active' },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  }
+  updatedAt: { type: Date, default: Date.now }
 });
 
 WorkerSchema.pre('save', function(next) {
-    this.updatedAt = Date.now();
-    next();
+  this.updatedAt = Date.now();
+  next();
 });
 
-module.exports = mongoose.model('Worker', WorkerSchema);
+module.exports = mongoose.models.Worker || mongoose.model('Worker', WorkerSchema);
