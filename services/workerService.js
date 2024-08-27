@@ -49,7 +49,7 @@ async function calculateTotalWorkerSalaryCost({ startDate, endDate, value, perio
     try {
         const workers = await getAllWorkers();
 
-        if (!startDate && !endDate) {
+        if (period != 'custom') {
             if (value && period) {
                 const duration = calculateDuration(value, period);
                 startDate = new Date(); // Default startDate to now if not provided
@@ -57,6 +57,9 @@ async function calculateTotalWorkerSalaryCost({ startDate, endDate, value, perio
             } else {
                 throw new Error('Either startDate and endDate or value and period must be provided.');
             }
+        } else {            
+            startDate = new Date(startDate)
+            endDate = new Date(endDate)
         }
 
         let totalSalary = 0;

@@ -195,6 +195,7 @@ const estimatePriceForAllFishGroups = async (req, res) => {
     });
 
     const profit = totalPrice - totalFoodConsumptionCost - workerSalaryCost - illnessCost;
+    const finalProfit = profit < 0 ? 0 : profit;
 
     res.status(200).json({
       totalEligibleFish,
@@ -204,7 +205,7 @@ const estimatePriceForAllFishGroups = async (req, res) => {
       totalFoodConsumptionCost,
       workerSalaryCost: Math.floor(workerSalaryCost),
       illnessCost: Math.floor(illnessCost),
-      profit: Math.floor(profit),
+      profit: Math.floor(finalProfit),
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
