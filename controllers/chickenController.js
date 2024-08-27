@@ -77,9 +77,10 @@ const estimateEggProductionForGroup = async (req, res) => {
       return res.status(404).json({ message: 'Chicken group not found' });
     }
 
-    const eggProduction = calculateEggProduction(group, timeFrame, value, startDate, endDate);
+    // Await the result of calculateEggProduction
+    const eggProduction = await calculateEggProduction(group, timeFrame, value, startDate, endDate);
 
-    res.json({ eggProduction });
+    res.json(eggProduction);  // Directly return the result without wrapping it in an object
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
