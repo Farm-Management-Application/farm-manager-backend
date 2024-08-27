@@ -7,6 +7,8 @@ const {
   standardPigNumber
 } = require('../data/pigData');
 const moment = require('moment');
+const WorkerService = require('../services/workerService');
+const IllnessService = require('../services/illnessService');
 
 // Set the locale to French
 moment.locale('fr');
@@ -113,7 +115,7 @@ const estimatePriceForPigGroup = async (req, res) => {
     const pigTypeData = pigTypes[pigGroup.type];
     const pigAgeMonths = Math.floor(moment.duration(moment().diff(pigGroup.birthDate)).asMonths());
 
-    if (pigGroup.type == 'moyen' ) {
+    if (pigGroup.type === 'moyen') {
       return res.status(400).json({ message: 'Pig group not yet ready for sale' });
     }
 
@@ -121,18 +123,32 @@ const estimatePriceForPigGroup = async (req, res) => {
     const weeksInAge = Math.floor(moment.duration(moment().diff(pigGroup.birthDate)).asWeeks());
 
     // Calculate total food consumption cost
-    const feedPeriods = weeksInAge; // number of weeks
+    const feedPeriods = weeksInAge;
     const foodConsumptionTotal = Math.floor(feedPeriods * (sackConsumption / standardPigNumber) * pricePerSack);
 
-    const profit = totalPrice - foodConsumptionTotal;
+    // Integrate worker salary cost
+    const workerSalaryCost = await WorkerService.calculateTotalWorkerSalaryCost({
+      startDate: pigGroup.birthDate,
+      endDate: new Date(),
+      value: pigAgeMonths,
+      period: 'months',
+    });
 
-    // Ensure profit is not negative
+    // Integrate illness cost for the pig group
+    const illnessCost = await IllnessService.calculateIllnessCostForLivestockGroup(
+      pigGroup._id,
+      { startDate: pigGroup.birthDate, endDate: new Date(), value: pigAgeMonths, period: 'months' }
+    );
+
+    const profit = totalPrice - foodConsumptionTotal - workerSalaryCost - illnessCost;
     const finalProfit = profit < 0 ? 0 : profit;
 
     res.status(200).json({
       totalPrice,
-      foodConsumptionTotal,
-      profit: finalProfit,
+      foodConsumptionTotal: Math.floor(foodConsumptionTotal),
+      workerSalaryCost: Math.floor(workerSalaryCost),
+      illnessCost: Math.floor(illnessCost),
+      profit: Math.floor(finalProfit),
       pigAge: moment.duration(pigAgeMonths, 'months').humanize(),
     });
   } catch (error) {
@@ -167,30 +183,44 @@ const estimatePriceForAllPigGroups = async (req, res) => {
 
     const weeksInAge = moment.duration(moment().diff(oldestGroupCreationDate)).asWeeks();
 
-    // Calculate total food consumption cost for eligible pig groups
     const totalFoodConsumption = Math.floor(eligiblePigGroups.reduce((total, pigGroup) => {
-      const feedPeriods = weeksInAge; // number of weeks
+      const feedPeriods = weeksInAge;
       return total + (feedPeriods * (sackConsumption / standardPigNumber) * pricePerSack);
     }, 0));
 
-    const totalProfit = totalPrice - totalFoodConsumption;
+    // Integrate worker salary cost
+    const workerSalaryCost = await WorkerService.calculateTotalWorkerSalaryCost({
+      startDate: oldestGroupCreationDate,
+      endDate: new Date(),
+      value: weeksInAge,
+      period: 'weeks',
+    });
 
-    // Ensure profit is not negative
+    // Integrate illness cost for all eligible pig groups
+    const illnessCost = await IllnessService.calculateIllnessCostForLivestockType('Pig', {
+      startDate: oldestGroupCreationDate,
+      endDate: new Date(),
+      value: weeksInAge,
+      period: 'weeks',
+    });
+
+    const totalProfit = totalPrice - totalFoodConsumption - workerSalaryCost - illnessCost;
     const finalProfit = totalProfit < 0 ? 0 : totalProfit;
 
     res.status(200).json({
       totalEligiblePigCount,
-      weeksInAge: moment.duration(weeksInAge, 'weeks').humanize(), // humanize weeksInAge
-      oldestGroupCreationDate: moment(oldestGroupCreationDate).fromNow(), // humanize oldestGroupCreationDate
+      weeksInAge: moment.duration(weeksInAge, 'weeks').humanize(),
+      oldestGroupCreationDate: moment(oldestGroupCreationDate).fromNow(),
       totalPrice,
-      totalFoodConsumption,
-      totalProfit: finalProfit
+      totalFoodConsumption: Math.floor(totalFoodConsumption),
+      workerSalaryCost: Math.floor(workerSalaryCost),
+      illnessCost: Math.floor(illnessCost),
+      totalProfit: Math.floor(finalProfit),
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 module.exports = {
   createPigGroup,
