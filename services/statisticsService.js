@@ -1,5 +1,5 @@
-const Pig = require('../models/Pig'); // Your models
-const Worker = require('../models/Worker');
+const Pig = require('../models/pig'); // Your models
+const Worker = require('../models/worker');
 const Illness = require('../models/Illness');
 const { getAllIllnesses } = require('../controllers/illnessController');
 
