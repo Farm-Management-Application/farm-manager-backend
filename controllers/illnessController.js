@@ -1,7 +1,7 @@
 const Illness = require('../models/Illness');
 const Chicken = require('../models/chicken');
 const Fish = require('../models/fish');
-const Pig = require('../models/Pig');
+const Pig = require('../models/pig');
 const livestockEnum = require('../data/enum');
 
 // Utility function to check if livestock exists based on type and id
