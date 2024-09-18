@@ -1,6 +1,8 @@
 const moment = require('moment');
-const Fish = require('../models/fish');
+const Fish = require('../models/Fish');
 const { fishTypes } = require('../data/fishData');
+const WorkerService = require('../services/workerService');
+const IllnessService = require('../services/illnessService');
 
 // Set the locale to French
 moment.locale('fr');
@@ -95,7 +97,6 @@ const estimatePriceForFishGroup = async (req, res) => {
       return res.status(400).json({ message: 'Fish group not yet ready for sale' });
     }
 
-    // Calculate the total weight of the fish group (assuming each fish weighs 1kg at 3 months)
     const totalWeightKg = fishGroup.totalCount * 1; // 1kg per fish
     const totalPrice = totalWeightKg * fishTypeData.unitPrice;
 
@@ -105,19 +106,32 @@ const estimatePriceForFishGroup = async (req, res) => {
     let foodConsumptionTotal = 0;
     if (fishTypeData.pricePerSack > 0) {
       const feedPeriods = Math.ceil((weeksInAge * 7) / fishTypeData.feedPeriodDays);
-      console.log(fishAgeMonths, weeksInAge, feedPeriods)
       foodConsumptionTotal = feedPeriods * fishTypeData.pricePerSack;
     }
 
-    const profit = totalPrice - foodConsumptionTotal;
+    // Integrate worker salary cost
+    const workerSalaryCost = await WorkerService.calculateTotalWorkerSalaryCost({
+      startDate: fishGroup.birthDate,
+      endDate: new Date(),
+      value: fishAgeMonths,
+      period: 'months',
+    });
 
-    // Ensure profit is not negative
+    // Integrate illness cost for the fish group
+    const illnessCost = await IllnessService.calculateIllnessCostForLivestockGroup(
+      fishGroup._id,
+      { startDate: fishGroup.birthDate, endDate: new Date(), value: fishAgeMonths, period: 'months' }
+    );
+
+    const profit = totalPrice - foodConsumptionTotal - workerSalaryCost - illnessCost;
     const finalProfit = profit < 0 ? 0 : profit;
 
     res.status(200).json({
       totalPrice,
-      foodConsumptionTotal,
-      profit: finalProfit,
+      foodConsumptionTotal: Math.floor(foodConsumptionTotal),
+      workerSalaryCost: Math.floor(workerSalaryCost),
+      illnessCost: Math.floor(illnessCost),
+      profit: Math.floor(finalProfit),
       fishAge: moment.duration(fishAgeMonths, 'months').humanize(),
       totalWeightKg,
     });
@@ -125,7 +139,6 @@ const estimatePriceForFishGroup = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 // Estimer le prix de vente pour tous les poissons éligibles à la vente
 const estimatePriceForAllFishGroups = async (req, res) => {
@@ -163,9 +176,26 @@ const estimatePriceForAllFishGroups = async (req, res) => {
         return total + (feedPeriods * fishTypeData.pricePerSack);
       }
       return total;
-    }, 0))
+    }, 0));
 
-    const profit = totalPrice - totalFoodConsumptionCost;
+    // Integrate worker salary cost
+    const workerSalaryCost = await WorkerService.calculateTotalWorkerSalaryCost({
+      startDate: oldestGroupCreationDate,
+      endDate: new Date(),
+      value: weeksInAge,
+      period: 'weeks',
+    });
+
+    // Integrate illness cost for all eligible fish groups
+    const illnessCost = await IllnessService.calculateIllnessCostForLivestockType('Fish', {
+      startDate: oldestGroupCreationDate,
+      endDate: new Date(),
+      value: weeksInAge,
+      period: 'weeks',
+    });
+
+    const profit = totalPrice - totalFoodConsumptionCost - workerSalaryCost - illnessCost;
+    const finalProfit = profit < 0 ? 0 : profit;
 
     res.status(200).json({
       totalEligibleFish,
@@ -173,7 +203,9 @@ const estimatePriceForAllFishGroups = async (req, res) => {
       oldestGroupCreationDate: moment(oldestGroupCreationDate).fromNow(),
       totalPrice,
       totalFoodConsumptionCost,
-      profit,
+      workerSalaryCost: Math.floor(workerSalaryCost),
+      illnessCost: Math.floor(illnessCost),
+      profit: Math.floor(finalProfit),
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

@@ -1,5 +1,7 @@
 const moment = require('moment');
-const Chicken = require('../models/chicken');
+const Chicken = require('../models/Chicken');
+const WorkerService = require('../services/workerService');
+const IllnessService = require('../services/illnessService');
 const { 
   eggPerWeek,
   eggPerTray, 
@@ -9,11 +11,12 @@ const {
   standardHenNumber, 
   pricePersack 
 } = require('../data/chickenData');
+const ObjectId = require('mongodb').ObjectId;
 
 // Set the locale to French
 moment.locale('fr');
 
-const calculateEggProduction = (group, timeFrame, value, startDate, endDate) => {
+const calculateEggProduction = async (group, timeFrame, value, startDate, endDate) => {
   const startDateMoment = moment(startDate);
   const endDateMoment = moment(endDate);
 
@@ -28,10 +31,12 @@ const calculateEggProduction = (group, timeFrame, value, startDate, endDate) => 
     throw new Error('Invalid timeFrame');
   }
 
-  // Calculate the age of the chicken group in weeks
   const chickenAgeWeeks = moment.duration(moment().diff(group.birthDate)).asWeeks();
 
-  // Check if the group is eligible (age >= 17 weeks)
+  const groupId = new ObjectId(group._id);
+  const workerSalaryCost = await WorkerService.calculateTotalWorkerSalaryCost({ startDate, endDate, value, period: timeFrame });
+  const illnessCost = await IllnessService.calculateIllnessCostForLivestockGroup(groupId, { startDate, endDate, value, period: timeFrame });
+
   if (chickenAgeWeeks < minAgeforLay) {
     return { 
       eggProduction: 0, 
@@ -39,36 +44,37 @@ const calculateEggProduction = (group, timeFrame, value, startDate, endDate) => 
       trays: 0, 
       totalConsumption: 0, 
       profit: 0, 
+      workerSalaryCost: Math.floor(workerSalaryCost),
+      illnessCost: Math.floor(illnessCost),
       duration: duration.humanize(), 
-      chickenAge: chickenAgeWeeks 
+      chickenAge:  moment.duration(chickenAgeWeeks, 'weeks').humanize()  
     };
   }
 
-  // Calculate the egg production
   const eggProduction = Math.floor(duration.asDays() * group.totalCount);
   const trays = Math.floor(eggProduction / eggPerTray);
 
-  // Calculate daily consumption per hen
   const dailyConsumptionPerHen = sackConsumptionPerDay / standardHenNumber;
-
-  // Calculate total food consumption
   const totalConsumption = Math.floor(dailyConsumptionPerHen * group.totalCount * duration.asDays() * pricePersack);
 
   const totalSales = trays * pricePerTray;
 
-  const profit = totalSales - totalConsumption;
+  const profit = totalSales - totalConsumption - workerSalaryCost - illnessCost;
+  const finalProfit = profit < 0 ? 0 : profit;
+  // const profit = totalSales - totalConsumption;
 
   return { 
     eggProduction, 
     totalSales, 
     trays, 
-    totalConsumption, 
-    profit, 
+    totalConsumption: Math.floor(totalConsumption), 
+    profit: Math.floor(finalProfit), 
+    workerSalaryCost: Math.floor(workerSalaryCost),
+    illnessCost: Math.floor(illnessCost),
     duration: duration.humanize(), 
     chickenAge: moment.duration(chickenAgeWeeks, 'weeks').humanize() 
   };
 };
-
 
 const calculateEggProductionForAll = async (timeFrame, value, startDate, endDate) => {
   const startDateMoment = moment(startDate);
@@ -99,23 +105,26 @@ const calculateEggProductionForAll = async (timeFrame, value, startDate, endDate
   const totalEggTrays = Math.floor(eggProduction / eggPerTray);
   const totalSales = totalEggTrays * pricePerTray;
 
-  // Calculate daily consumption per hen
   const dailyConsumptionPerHen = sackConsumptionPerDay / standardHenNumber;
-
-  // Calculate total food consumption cost
   const totalFoodConsumptionCost = eligibleChickens.reduce((total, chicken) => {
     return total + (dailyConsumptionPerHen * chicken.totalCount * duration.asDays() * pricePersack);
   }, 0);
 
-  const profit = totalSales - totalFoodConsumptionCost;
+  const workerSalaryCost = await WorkerService.calculateTotalWorkerSalaryCost({ startDate, endDate, value, period: timeFrame });
+  const illnessCost = await IllnessService.calculateIllnessCostForLivestockType('Chicken', { startDate, endDate, value, period: timeFrame });
+
+  const profit = totalSales - totalFoodConsumptionCost - workerSalaryCost - illnessCost;
+  const finalProfit = profit < 0 ? 0 : profit;
 
   return {
     duration: duration.humanize(),
     eggProduction,
     totalEggTrays,
     totalSales,
-    totalFoodConsumptionCost,
-    profit
+    totalFoodConsumptionCost: Math.floor(totalFoodConsumptionCost), 
+    workerSalaryCost: Math.floor(workerSalaryCost),
+    illnessCost: Math.floor(illnessCost),
+    profit: Math.floor(finalProfit), 
   };
 };
 

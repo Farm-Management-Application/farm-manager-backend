@@ -1,9 +1,11 @@
-const Chicken = require('../models/chicken');
+const Chicken = require('../models/Chicken');
 const { calculateEggProductionForAll, calculateEggProduction } = require('../services/chickenService');
 
 const createChicken = async (req, res) => {
   try {
+    console.log(req.body)
     const chicken = new Chicken(req.body);
+    console.log(chicken)
     await chicken.save();
     res.status(201).send(chicken);
   } catch (error) {
@@ -14,11 +16,11 @@ const createChicken = async (req, res) => {
 const updateChicken = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, totalCount, birthDate } = req.body;
+    const { name, totalCount, birthDate } = req.body;
 
     const updatedGroup = await Chicken.findByIdAndUpdate(
       id,
-      { title, totalCount, birthDate, modifiedAt: Date.now() },
+      { name, totalCount, birthDate, modifiedAt: Date.now() },
       { new: true }
     );
 
@@ -75,9 +77,10 @@ const estimateEggProductionForGroup = async (req, res) => {
       return res.status(404).json({ message: 'Chicken group not found' });
     }
 
-    const eggProduction = calculateEggProduction(group, timeFrame, value, startDate, endDate);
+    // Await the result of calculateEggProduction
+    const eggProduction = await calculateEggProduction(group, timeFrame, value, startDate, endDate);
 
-    res.json({ eggProduction });
+    res.json(eggProduction);  // Directly return the result without wrapping it in an object
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
