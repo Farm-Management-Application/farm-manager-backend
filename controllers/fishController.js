@@ -1,5 +1,5 @@
 const moment = require('moment');
-const Fish = require('../models/fish');
+const Fish = require('../models/Fish');
 const { fishTypes } = require('../data/fishData');
 const WorkerService = require('../services/workerService');
 const IllnessService = require('../services/illnessService');
