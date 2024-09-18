@@ -1,4 +1,4 @@
-const Worker = require('../models/Worker');
+const Worker = require('../models/worker');
 const calculateDuration = require('../utils/helper');
 
 async function getAllWorkers() {

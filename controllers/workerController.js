@@ -1,5 +1,5 @@
 // controllers/workerController.js
-const Worker = require('../models/Worker');
+const Worker = require('../models/worker');
 
 // Create a new worker
 exports.createWorker = async (req, res) => {
