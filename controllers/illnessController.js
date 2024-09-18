@@ -1,5 +1,5 @@
 const Illness = require('../models/Illness');
-const Chicken = require('../models/Chicken');
+const Chicken = require('../models/chicken');
 const Fish = require('../models/Fish');
 const Pig = require('../models/Pig');
 const livestockEnum = require('../data/enum');

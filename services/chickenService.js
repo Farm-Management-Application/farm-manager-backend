@@ -1,5 +1,5 @@
 const moment = require('moment');
-const Chicken = require('../models/Chicken');
+const Chicken = require('../models/chicken');
 const WorkerService = require('../services/workerService');
 const IllnessService = require('../services/illnessService');
 const { 

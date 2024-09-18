@@ -1,4 +1,4 @@
-const Chicken = require('../models/Chicken');
+const Chicken = require('../models/chicken');
 const { calculateEggProductionForAll, calculateEggProduction } = require('../services/chickenService');
 
 const createChicken = async (req, res) => {
